@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Asistencia - Gestión Académica</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            text-align: center;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        h2 { 
+            margin-top: 0; 
+            font-size: 1.1rem; 
+            color: var(--primary);
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input, select { 
+            padding: 10px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button { 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 6px; 
+            padding: 10px 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-add { background: var(--primary); color: white; width: 100%; }
+        .btn-add:hover { background: #1d4ed8; }
+
+        .btn-edit { background: var(--warning); color: white; padding: 5px 8px; margin-right: 5px; }
+        .btn-del { background: var(--danger); color: white; padding: 5px 8px; }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 0.85rem;
+        }
+
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        th { 
+            background: #f8fafc; 
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tr:hover { background: #f1f5f9; }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-presente { background: #dcfce7; color: #166534; }
+        .badge-ausente { background: #fee2e2; color: #991b1b; }
+
+        @media (max-width: 1000px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Gestión de Asistencia y Talleres</h1>
+        </header>
+
+        <!-- COLUMNA IZQUIERDA: FORMULARIOS DE REGISTRO -->
+        <div class="sidebar">
+            <div class="card">
+                <h2>Registrar Alumno</h2>
+                <div class="form-group">
+                    <input type="text" id="aluNom" placeholder="Nombres">
+                    <input type="text" id="aluApe" placeholder="Apellidos">
+                    <input type="text" id="aluDni" placeholder="DNI">
+                    <input type="email" id="aluCor" placeholder="Correo">
+                    <button class="btn-add" onclick="crear('/alumnos', {nombre: aluNom.value, apellido: aluApe.value, dni: aluDni.value, correo: aluCor.value})">Guardar Alumno</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Registrar Instructor</h2>
+                <div class="form-group">
+                    <input type="text" id="insNom" placeholder="Nombre Completo">
+                    <input type="text" id="insEsp" placeholder="Especialidad">
+                    <button class="btn-add" onclick="crear('/instructores', {nombre: insNom.value, especialidad: insEsp.value})">Guardar Instructor</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Nuevo Taller</h2>
+                <div class="form-group">
+                    <input type="text" id="talNom" placeholder="Nombre del Taller">
+                    <input type="number" id="talCup" placeholder="Cupos">
+                    <input type="number" id="talIns" placeholder="ID Instructor">
+                    <button class="btn-add" onclick="crear('/talleres', {nombre_taller: talNom.value, descripcion: '', cupos: talCup.value, id_instructor: talIns.value})">Crear Taller</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Inscripción y Asistencia</h2>
+                <div class="form-group">
+                    <input type="number" id="insAlu" placeholder="ID Alumno">
+                    <input type="number" id="insTal" placeholder="ID Taller">
+                    <input type="date" id="insFec">
+                    <button class="btn-add" onclick="crear('/inscripciones', {id_alumno: insAlu.value, id_taller: insTal.value, fecha_inscripcion: insFec.value})">Inscribir</button>
+                    
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+                    
+                    <input type="number" id="asiIns" placeholder="ID Inscripción">
+                    <input type="date" id="asiFec">
+                    <select id="asiEst">
+                        <option value="Presente">Presente</option>
+                        <option value="Ausente">Ausente</option>
+                    </select>
+                    <button class="btn-add" style="background: var(--success);" onclick="crear('/asistencias', {id_inscripcion: asiIns.value, fecha: asiFec.value, estado: asiEst.value})">Marcar Asistencia</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: TABLAS DE DATOS -->
+        <div class="main-content">
+            <div class="card">
+                <h2>Listado de Alumnos</h2>
+                <div style="overflow-x: auto;">
+                    <table id="tAlu"></table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Talleres e Instructores</h2>
+                <div style="overflow-x: auto;">
+                    <table id="tTal"></table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Registro de Asistencias</h2>
+                <div style="overflow-x: auto;">
+                    <table id="tAsis"></table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Inscripciones Activas</h2>
+                <div style="overflow-x: auto;">
+                    <table id="tInsc"></table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Instructores Registrados</h2>
+                <div style="overflow-x: auto;">
+                    <table id="tIns"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cargar = async () => {
+            try {
+                const resA = await (await fetch('/alumnos')).json();
+                document.getElementById('tAlu').innerHTML = `<tr><th>ID</th><th>Nombre</th><th>DNI</th><th>Acciones</th></tr>` + resA.map(i => `<tr><td>${i.id_alumno}</td><td>${i.nombre} ${i.apellido}</td><td>${i.dni}</td><td>
+                    <button class="btn-edit" onclick="editar('Alumnos','nombre','id_alumno',${i.id_alumno},'${i.nombre}')">✏️</button>
+                    <button class="btn-del" onclick="eliminar('Alumnos','id_alumno',${i.id_alumno})">🗑️</button>
+                </td></tr>`).join('');
+
+                const resI = await (await fetch('/instructores')).json();
+                document.getElementById('tIns').innerHTML = `<tr><th>ID</th><th>Nombre</th><th>Especialidad</th><th>Acciones</th></tr>` + resI.map(i => `<tr><td>${i.id_instructor}</td><td>${i.nombre}</td><td>${i.especialidad}</td><td>
+                    <button class="btn-edit" onclick="editar('Instructores','nombre','id_instructor',${i.id_instructor},'${i.nombre}')">✏️</button>
+                    <button class="btn-del" onclick="eliminar('Instructores','id_instructor',${i.id_instructor})">🗑️</button>
+                </td></tr>`).join('');
+
+                const resT = await (await fetch('/talleres')).json();
+                document.getElementById('tTal').innerHTML = `<tr><th>ID</th><th>Taller</th><th>Instructor</th><th>Acciones</th></tr>` + resT.map(i => `<tr><td>${i.id_taller}</td><td>${i.nombre_taller}</td><td>${i.nombre_instructor || 'N/A'}</td><td>
+                    <button class="btn-edit" onclick="editar('Talleres','nombre_taller','id_taller',${i.id_taller},'${i.nombre_taller}')">✏️</button>
+                    <button class="btn-del" onclick="eliminar('Talleres','id_taller',${i.id_taller})">🗑️</button>
+                </td></tr>`).join('');
+
+                const resInsc = await (await fetch('/inscripciones')).json();
+                document.getElementById('tInsc').innerHTML = `<tr><th>ID</th><th>Alumno</th><th>Taller</th><th>Fecha</th><th>Acciones</th></tr>` + resInsc.map(i => `<tr><td>${i.id_inscripcion}</td><td>${i.nombre_alumno}</td><td>${i.nombre_taller}</td><td>${i.fecha_inscripcion.split('T')[0]}</td><td>
+                    <button class="btn-del" onclick="eliminar('Inscripciones','id_inscripcion',${i.id_inscripcion})">🗑️</button>
+                </td></tr>`).join('');
+
+                const resAsis = await (await fetch('/asistencias')).json();
+                document.getElementById('tAsis').innerHTML = `<tr><th>ID</th><th>Alumno</th><th>Taller</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr>` + resAsis.map(i => `<tr><td>${i.id_asistencia}</td><td>${i.nombre_alumno}</td><td>${i.nombre_taller}</td><td>${i.fecha.split('T')[0]}</td><td><span class="badge badge-${i.estado.toLowerCase()}">${i.estado}</span></td><td>
+                    <button class="btn-del" onclick="eliminar('Asistencias','id_asistencia',${i.id_asistencia})">🗑️</button>
+                </td></tr>`).join('');
+            } catch (e) { console.error(e); }
+        };
+
+        const crear = async (url, data) => {
+            const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+            const result = await response.json();
+            if (!result.ok) alert('Error: ' + (result.error || 'No se pudo guardar'));
+            else { cargar(); if(url === '/alumnos') { document.getElementById('aluNom').value=''; document.getElementById('aluApe').value=''; document.getElementById('aluDni').value=''; document.getElementById('aluCor').value=''; } }
+        };
+
+        const eliminar = async (tabla, pk, id) => { if(confirm('¿Eliminar?')) { await fetch(`/${tabla}/${pk}/${id}`, { method: 'DELETE' }); cargar(); } };
+
+        const editar = async (tabla, col, pk, id, actual) => {
+            const nuevoValor = prompt("Nuevo valor:", actual);
+            if(nuevoValor) { await fetch(`/${tabla}/${col}/${pk}/${id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nuevoValor }) }); cargar(); }
+        };
+
+        cargar();
+    </script>
+</body>
+</html>
